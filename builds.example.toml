@@ -1,0 +1,12 @@
+# Builds the harness runs. `--target` is fuzzed; `--reference` re-runs each new crash for the engine comparison.
+# Copy to builds.toml and set the paths. These match `SERVO=/path/to/servo bin/build.sh`.
+
+[qjs-asan]
+engine = "quickjs"
+binary = "/path/to/servo/target/fuzz-qjs-asan/x86_64-unknown-linux-gnu/checked-release/servoshell"
+servo_dir = "/path/to/servo"
+
+[sm-asan]
+engine = "spidermonkey"
+binary = "/path/to/servo/target/fuzz-sm-asan/x86_64-unknown-linux-gnu/checked-release/servoshell"
+servo_dir = "/path/to/servo"

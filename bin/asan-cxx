@@ -1,0 +1,7 @@
+#!/bin/sh
+# Instruments C/C++ only for crates built for the ASan target: their build scripts see
+# sanitize="address" in CARGO_CFG_SANITIZE, while host crates (build scripts, proc macros) don't.
+case "$CARGO_CFG_SANITIZE" in
+    *address*) exec "${FUZZ_CXX:-clang++}" -fsanitize=address -fno-omit-frame-pointer "$@" ;;
+esac
+exec "${FUZZ_CXX:-clang++}" "$@"

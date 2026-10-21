@@ -1,0 +1,58 @@
+# Crashes with a known cause: they are counted, not triaged. `pattern` is a regex searched in the signature
+# (panics: `<file>|<normalized message>`), `kind` defaults to any kind.
+# Seeded from fred-wang/servo-fuzzing's print-unknown-panic.sh (2026-08-20) and Servo's WPT expectations.
+
+[[known]]
+kind = "panic"
+pattern = 'components/layout/flow/inline/mod\.rs\|!will_break'
+issue = "https://github.com/servo/servo/issues/45793"
+
+[[known]]
+kind = "panic"
+pattern = 'execcommand/contenteditable/node\.rs\|Must always have an active range'
+issue = "https://github.com/servo/servo/issues/47150"
+
+[[known]]
+kind = "panic"
+pattern = 'compute/grid/types/named\.rs\|attempt to add with overflow'
+issue = "https://github.com/servo/servo/issues/46234"
+
+[[known]]
+kind = "panic"
+pattern = 'picture_composite_mode\.rs\|bug: unable to map mix-blend content into parent'
+issue = "https://github.com/servo/servo/issues/47148"
+
+[[known]]
+kind = "panic"
+pattern = 'euclid/src/size\.rs\|called `Option::unwrap\(\)` on a `None` value'
+issue = "https://github.com/servo/servo/issues/46202"
+
+[[known]]
+kind = "panic"
+pattern = 'tiny-skia-path/src/alpha_run\.rs\|called `Option::unwrap\(\)` on a `None` value'
+issue = "https://github.com/servo/servo/issues/47335"
+
+[[known]]
+kind = "panic"
+pattern = 'inserthorizontalrule\.rs\|internal error: entered unreachable code: Should always be able to extend the selection'
+issue = "https://github.com/servo/servo/issues/47333"
+
+[[known]]
+kind = "panic"
+pattern = 'conversions\.rs\|JS String copy routine failed'
+issue = "https://github.com/servo/servo/issues/46197"
+
+[[known]]
+kind = "panic"
+pattern = 'components/script/dom/node/node\.rs\|internal error: entered unreachable code$'
+issue = "https://github.com/servo/servo/issues/45795"
+
+[[known]]
+kind = "panic"
+pattern = 'tree_ordered_index_map\.rs\|internal error: entered unreachable code: Tried to remove unknown id or name entry'
+issue = "WPT expected CRASH: dom/nodes/moveBefore/moveBefore-disconnected-id-map.html"
+
+[[known]]
+kind = "panic"
+pattern = 'style/servo/animation\.rs\|assertion failed: \*progress >= n'
+issue = "https://github.com/servo/servo/issues/46783"
