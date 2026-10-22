@@ -42,7 +42,7 @@ class Build:
                     "detect_leaks=0",
                     "abort_on_error=1",
                     "allocator_may_return_null=1",
-                    "hard_rss_limit_mb=3072",
+                    "hard_rss_limit_mb=4096",
                     # Fake stacks put locals on the heap, which trips stylo's stack-limit debug assertion
                     # (context.rs: distance_to_stack_bottom) on a quarter of the generated pages.
                     "detect_stack_use_after_return=0",
