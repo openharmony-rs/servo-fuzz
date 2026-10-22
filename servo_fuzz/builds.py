@@ -32,6 +32,8 @@ class Build:
     def environment(self, asan_log_prefix: str) -> dict[str, str]:
         env = dict(os.environ)
         env["RUST_BACKTRACE"] = "1"
+        # llvm-symbolizer would ask debuginfod about every module in a report, seconds each (Ubuntu sets this).
+        env.pop("DEBUGINFOD_URLS", None)
         if self.engine == "quickjs":
             env["QJS_VERIFY_TRACING"] = "1"
         if self.asan:
@@ -41,7 +43,6 @@ class Build:
                     "abort_on_error=1",
                     "allocator_may_return_null=1",
                     "hard_rss_limit_mb=3072",
-                    "symbolize=0",
                     # Fake stacks put locals on the heap, which trips stylo's stack-limit debug assertion
                     # (context.rs: distance_to_stack_bottom) on a quarter of the generated pages.
                     "detect_stack_use_after_return=0",

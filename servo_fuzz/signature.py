@@ -19,7 +19,11 @@ CRASH_KINDS = [
 PANIC_RE = re.compile(r"^(?P<msg>.*) \(thread (?P<thread>[^,]+), at (?P<file>.+?):(?P<line>\d+)\)$")
 FRAME_RE = re.compile(r"^\s*\d+: (?P<func>.+)$")
 ASAN_ERROR_RE = re.compile(r"ERROR: AddressSanitizer: (?P<type>[\w-]+)")
-ASAN_FRAME_RE = re.compile(r"^\s*#\d+ 0x[0-9a-f]+ in (?P<func>.+?)(?: (?P<loc>/\S+|\(\S+\)))?$")
+# The location is a file (with line tables), a codegen unit (symbol table only) or a module offset.
+ASAN_FRAME_RE = re.compile(
+    r"^\s*#\d+ 0x[0-9a-f]+ in (?P<func>.+?)"
+    r"(?: (?P<loc>\(\S+\+0x[0-9a-f]+\)|\S+:\d+(?::\d+)?|\S+-cgu\.\d+|/\S+))?(?: \(BuildId: [0-9a-f]+\))?$"
+)
 VERIFIER_RE = re.compile(r"QuickJS tracing verifier: (?P<text>.+)")
 ASSERT_RE = re.compile(r": (?P<func>[\w$]+): Assertion `(?P<expr>.+)' failed")
 STACK_OVERFLOW_RE = re.compile(r"thread '(?P<thread>[^']+)' has overflowed its stack")
@@ -39,6 +43,8 @@ UNINTERESTING_FRAME_RE = re.compile(
     r"servoshell::crash_handler|backtrace::|<unknown>|rust_begin_unwind|sigaction|"
     r"mozjs::panic::wrap_panic|__rustc::|[\w.+-]+\.so[.\d]*\+0x)"
 )
+# Inlined frames have short names with line tables only, so the standard library is recognized by its source path.
+RUST_LIBRARY_RE = re.compile(r"/rustlib/src/rust/library/|^/rustc/")
 
 
 @dataclass
@@ -85,7 +91,7 @@ def _asan(report: str) -> Classification | None:
             frames.append(_clean_func(match["func"]))
             files.append(match["loc"] or "")
     access = re.search(r"^(READ|WRITE) of size \d+", report, re.M)
-    top = _interesting(frames)
+    top = _interesting([f for f, path in zip(frames, files) if not RUST_LIBRARY_RE.search(path)])
     summary = f"{error['type']} {access.group(0) if access else ''} in {top[0] if top else '?'}".replace("  ", " ")
     return Classification(
         "asan",

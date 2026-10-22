@@ -11,7 +11,6 @@ from pathlib import Path
 
 from .builds import ARGS, Build
 from .signature import Classification, classify
-from .symbolize import symbolize
 
 NOISE = (
     "XDG_RUNTIME_DIR",
@@ -73,7 +72,7 @@ def run(build: Build, testcase: Path, workdir: Path, timeout: float = 15, extra_
     output = log_path.read_text(errors="replace")
     output = "\n".join(line for line in output.splitlines() if not any(noise in line for noise in NOISE))
     report_paths = sorted(glob.glob(str(workdir / "asan.*")))
-    reports = [symbolize(Path(p).read_text(errors="replace"), build.binary) for p in report_paths]
+    reports = [Path(p).read_text(errors="replace") for p in report_paths]
     returncode = None if timed_out else process.returncode
     classification = classify(output, reports, returncode, timed_out)
     log = output + "".join(f"\n==== {Path(name).name}\n{text}" for name, text in zip(report_paths, reports))

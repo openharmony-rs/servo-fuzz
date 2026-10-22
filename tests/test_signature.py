@@ -24,6 +24,21 @@ class ClassifyTest(unittest.TestCase):
         self.assertIn("READ of size 8", c.summary)
         self.assertEqual(engine_side(c), "qjs-engine")
 
+    def test_asan_frame_locations(self):
+        report = """==1==ERROR: AddressSanitizer: SEGV on unknown address 0x03e8000614b8 (pc 0x7f13 bp 0x7ffe sp 0x7ffe T0)
+    #0 0x7f135cf2f52d in getenv (/lib/x86_64-linux-gnu/libc.so.6+0x48806) (BuildId: a4a7992a8e66555c8141ab2a08a8465ff6e0ea65)
+    #1 0x7ba27d991093  (/lib/x86_64-linux-gnu/libgallium.so+0x568093) (BuildId: 0123456789abcdef)
+    #2 0x55a8477f09f4 in <gleam::gl::GlFns as gleam::gl::Gl>::shader_source gleam.bae54a1812ce0e60-cgu.03
+    #3 0x55c0d603284d in wait_optional_timeout /home/u/.rustup/toolchains/1.97.1-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/std/src/sys/sync/condvar/futex.rs:49:17
+    #4 0x55a8477b3eff in <webrender::device::gl::Device>::compile_shader /home/u/.cargo/git/checkouts/webrender-1/abc/webrender/src/device/gl.rs:2010:9
+"""
+        c = classify("", [report], -6, False)
+        self.assertEqual(
+            c.signature,
+            "SEGV|getenv|<gleam::gl::GlFns as gleam::gl::Gl>::shader_source|<webrender::device::gl::Device>::compile_shader",
+        )
+        self.assertEqual(c.files[1], "gleam.bae54a1812ce0e60-cgu.03")
+
     def test_asan_oom(self):
         report = "==1==ERROR: AddressSanitizer: requested allocation size 0x10000000000 exceeds maximum supported size"
         self.assertEqual(classify("", [report], -6, False).kind, "oom")

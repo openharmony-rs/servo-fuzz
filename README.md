@@ -15,7 +15,7 @@ SERVO=/path/to/servo bin/build.sh
 cp builds.example.toml builds.toml                          # then set the paths
 ```
 
-- `bin/build.sh` builds `qjs-asan` and `sm-asan` (`checked-release`, ASan) into `$TARGET_DIR/fuzz-<build>`; `TARGET_DIR` defaults to `$SERVO/target`. `FUZZ_CC`/`FUZZ_CXX` set the compilers (default `clang`/`clang++`), `BUILDS` picks a subset, and other variables (e.g. `LIBCLANG_PATH`) pass through to mach.
+- `bin/build.sh` builds `qjs-asan` and `sm-asan` (`checked-release` with line tables, ASan) into `$TARGET_DIR/fuzz-<build>`; `TARGET_DIR` defaults to `$SERVO/target`. `FUZZ_CC`/`FUZZ_CXX` set the compilers (default `clang`/`clang++`), `BUILDS` picks a subset, and other variables (e.g. `LIBCLANG_PATH`) pass through to mach.
 - `builds.toml` (not in git) lists the binaries the harness runs.
 - `bin/asan-cc` instruments the C/C++ of target crates, which `mach --with-asan` misses on native builds.
 - The SpiderMonkey build compiles SpiderMonkey from source with ASan.
@@ -36,7 +36,7 @@ cp builds.example.toml builds.toml                          # then set the paths
 
 - **Runs:** one process per testcase: `servoshell --headless --exit --hard-fail`, with a 10 s timeout. Each worker generates its own batches (Domato, Freedom, Minerva) and runs them.
 - **Classification** (`signature.py`) into these kinds: `asan`, `verifier`, `qjs-assert`, `oom`, `stack-overflow`, `unimplemented` (a SpiderMonkey function the shim lacks), `panic`, `signal`, `exit`, `timeout` or `ok`. The signature is the kind plus the top frames, or the panic's file and normalized message.
-- **ASan options:** reports are written unsymbolized, and `symbolize.py` resolves them from `nm`. llvm-symbolizer takes minutes per report on this binary, which has no DWARF. Fake stacks are off, because they trip stylo's stack-limit debug assertion.
+- **ASan options:** ASan symbolizes reports with `llvm-symbolizer` from `PATH`; the harness unsets `DEBUGINFOD_URLS`, which made that take minutes per report. Fake stacks are off, because they trip stylo's stack-limit debug assertion.
 - **Findings** (`data/findings/<id>/`): one per signature, with the first testcase, up to 5 more, logs and `finding.json`.
   - A new finding runs 3× alone on the target build and 3× on the reference build.
   - `servo` means the same signature on SpiderMonkey. `qjs-engine`, `qjs-shim` and `qjs-exposed` mean only QuickJS crashes, with QuickJS C code, the shim or Servo code on top of the stack. `flaky` means the crash didn't reproduce alone.
